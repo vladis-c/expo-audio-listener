@@ -19,19 +19,20 @@ class ExpoAudioListenerModule : Module() {
     Events(AUDIO_MODE_CHANGED)
 
     OnStartObserving {
-      audioManager?.addOnModeChangedListener(Executors.newSingleThreadExecutor(), listener)
+      audioManager?.addOnCommunicationDeviceChangedListener(Executors.newSingleThreadExecutor(), listener)
     }
 
     OnStopObserving {
-      audioManager?.removeOnModeChangedListener(listener)
+      audioManager?.removeOnCommunicationDeviceChangedListener(listener)
     }
   }
 
   private val audioManager: AudioManager?
     get() = appContext.reactContext?.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
 
-  private val listener = AudioManager.OnModeChangedListener {
-    audioManager?.mode?.let { mode ->
+  @RequiresApi(Build.VERSION_CODES.S)
+  private val listener = AudioManager.OnCommunicationDeviceChangedListener {
+    audioManager?.communicationDevice?.let { mode ->
       this@ExpoAudioListenerModule.sendEvent(
         AUDIO_MODE_CHANGED,
         bundleOf("mode" to mode)
